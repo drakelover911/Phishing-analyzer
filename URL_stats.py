@@ -13,51 +13,50 @@ popular_domains = set(dd["Root Domain"])
 
 def check_http(url):
     if url.startswith("http:"):
-        return 3
-    return 0
-
-def check_length(url):
-    if len(url) > 150:
         return 1
     return 0
 
-def check_domain(url):
+def check_length(url):
+    return len(url)
+       
+
+def check_tld(url):
+    ext = tldextract.extract(url)
+    url = "." + ext.suffix
     popular_domains = [".pl", ".com", ".eu", ".net", ".org", ".io"]
     for tld in popular_domains:
         if tld in url:
-            return 0
-    return 1
+            return 1
+    return 0
 
 def check_ip(url):
     x = re.search(r"\b([0-9]{1,3}\.){3}[0-9]{1,3}\b", url)
     if x:
-        return 3
+        return 1
     return 0
 
 def check_latin(url):
     for letter in url:
         if (ord(letter) > 126 or ord(letter) < 32):
-            return 3
+            return 1
     return 0
 
 def check_whitelist(url, data):
     ext = tldextract.extract(url)
     url = ext.domain + "." + ext.suffix
     if url in data:
-        return 0
-    return 1
+        return 1
+    return 0
 
 def check_shannon_entropy(url):
     counts = Counter(url)
     frequencies = ((i / len(url)) for i in counts.values())
     result = -sum(f * log(f, 2) for f in frequencies)
-    if result > 3.2:
-        return 3
-    return 0
+    return result
 
 def check_at(url):
     if "@" in url:
-        return 3
+        return 1
     return 0
 
 def check_characters(url):
@@ -66,33 +65,27 @@ def check_characters(url):
     for letter in url:
         if letter in suspicious_characters:
             count += 1
-    if count > 4:
-        return 2
-    return 0
+    return count
 
 def check_numbers(url):
     count = 0
     for char in url:
         if char.isdigit():
             count +=1
-    if count > 3:
-        return 2
-    return 0
+    return count
 
 def check_subdomains(url):
-    count = 0
+    count = -1
     for char in url:
         if char == ".":
             count +=1
-    if count > 3:
-        return 2
-    return 0
+    return count
 
 def check_sus_domains(url):
-    list = [".ru", ".xyz", ".best", ".bid", ".click", ".info", ".zip", ".top"]
+    list = [".ru", ".xyz", ".best", ".bid", ".click", ".info", ".zip", ".top", ".weebly"]
     for domain in list:
         if domain in url:
-            return 2
+            return 1
     return 0
 
 def check_keywords(url):
@@ -113,45 +106,86 @@ def check_keywords(url):
     "confirmaccount", "verifyaccount", "resetpassword",
     "webscr", "ebayisapi", "wp-admin", "admin", "support"
 ]
+    count = 0
     for word in PHISHING_KEYWORDS:
         if word in url:
-            return 2
-    return 0
+            count +=1
+    return count
 
 def check_fake_domains(url, data):
     ext = tldextract.extract(url)
     url = ext.domain + "." + ext.suffix
     for domain in data:
-        if domain in url and check_whitelist(url, safe_domains):
-            return 4
+        if domain in url and not check_whitelist(url, safe_domains):
+            return 1
     return 0
 
 def check_distance(url, data):
+    lista = []
     ext = tldextract.extract(url)
     url = ext.domain
     for domain in data:
-        if (nltk.edit_distance(url, domain) == 1):
-            return 4
-        elif (nltk.edit_distance(url, domain) == 2):
-            return 2
-        else:
-            return 0
+        dist = nltk.edit_distance(url, domain)
+        lista.append(dist)
+    dist1 = min(lista)
+    return dist1
+
+def is_free_hosting(url):
+    free_hosts = [
+        "weebly.com", "wixsite.com", "wordpress.com", "github.io", "freehostia.com",
+        "000webhostapp.com", "bravesites.com", "jimdosite.com", "webnode.com",
+        "vercel.app", "netlify.app", "herokuapp.com", "firebaseapp.com", 
+        "web.app", "pages.dev", "glitch.me", "onrender.com", "azurewebsites.net",
+        "forms.gle", "typeform.com", "jotform.com", "survey-smiles.com",
+        "s3.amazonaws.com", "storage.googleapis.com", "sharepoint.com", "blob.core.windows.net"
+        ]
+    for host in free_hosts:
+        if host in url:
+            return 1
+    return 0
+
+def is_shortened(url):
+    ext = tldextract.extract(url)
+    url = ext.domain + "." + ext.suffix
+    shorteners_list = [
+    "bit.ly", "bitly.kr", "bl.ink", "buff.ly", "clicky.me", "cutt.ly", 
+    "dub.co", "fox.ly", "gg.gg", "han.gl", "is.gd", "kurzelinks.de", 
+    "kutt.it", "lstu.fr", "oe.cd", "ow.ly", "rebrandly.com", "reduced.to", 
+    "rip.to", "san.aq", "short.io", "shorten-url.com", "shorturl.at", 
+    "spoo.me", "switchy.io", "tinu.be", "tinyurl.com", "t.ly", "urlr.me", 
+    "v.gd", "vo.la", "yaso.su", "zlnk.com", "sor.bz", "73.nu", "lyn.bz",
+    "shlink.io", "yourls.org", "polr.me",
+    "git.io", "goo.gl", "me2.do", "cutit.org", "s2r.co", "soo.gd", "hoy.kr"
+    ]
+    for element in shorteners_list:
+        if element in url:
+            return 1
     return 0
     
+    
+def features(url, safe, pop):
+    features = {"HTTP": check_http(url),
+    "URL Length": check_length(url),
+    "Popular tld in URL": check_tld(url),
+    "IP": check_ip(url),
+    "Non-latin characters": check_latin(url),
+    "URL IN WHITELIST": check_whitelist(url, safe),
+    "Entropy": check_shannon_entropy(url),
+    "@ in url": check_at(url),
+    "Suspicious characters": check_characters(url),
+    "Digits": check_numbers(url),
+    "Subdomains": check_subdomains(url),
+    "Sus domains": check_sus_domains(url),
+    "Number of phishing words": check_keywords(url),
+    "Popular domain and not in whitelist": check_fake_domains(url, safe),
+    "Levenshtein Distance": check_distance(url,pop),
+    "Free Hosting": is_free_hosting(url),
+    "URL is shortened": is_shortened(url)
+    }
+    return features
 
-def points_count(url):
-    total = 0
-    if check_whitelist(url, safe_domains) == False:
-        return 0
-    check_list = [check_latin, check_at, check_characters, check_distance, check_domain, check_fake_domains, check_http, 
-                  check_ip, check_keywords, check_shannon_entropy, check_numbers]
-    for func in check_list:
-        if func in [check_fake_domains, check_distance]:
-            total += func(url, popular_domains)
-        else:
-            total += func(url)
-    return total
+
 
 
 url = input("Enter URL link: ")
-print("Final score:", points_count(url))
+print(features(url, safe_domains, popular_domains))
