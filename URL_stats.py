@@ -62,6 +62,8 @@ def check_at(url):
     return 0
 
 def check_characters(url):
+    ext = tldextract.extract(url)
+    url = ext.domain + "." + ext.suffix
     count = 0
     suspicious_characters=["?", "-", "_", "&", "*", "=", "%", "^", "#"]
     for letter in url:
@@ -70,6 +72,8 @@ def check_characters(url):
     return count
 
 def check_numbers(url):
+    ext = tldextract.extract(url)
+    url = ext.domain + "." + ext.suffix
     count = 0
     for char in url:
         if char.isdigit():
