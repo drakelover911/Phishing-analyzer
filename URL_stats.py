@@ -49,6 +49,8 @@ def check_whitelist(url, data):
     return 0
 
 def check_shannon_entropy(url):
+    ext = tldextract.extract(url)
+    url = ext.domain +"." + ext.suffix
     counts = Counter(url)
     frequencies = ((i / len(url)) for i in counts.values())
     result = -sum(f * log(f, 2) for f in frequencies)
@@ -137,7 +139,7 @@ def is_free_hosting(url):
         "vercel.app", "netlify.app", "herokuapp.com", "firebaseapp.com", 
         "web.app", "pages.dev", "glitch.me", "onrender.com", "azurewebsites.net",
         "forms.gle", "typeform.com", "jotform.com", "survey-smiles.com",
-        "s3.amazonaws.com", "storage.googleapis.com", "sharepoint.com", "blob.core.windows.net"
+        "s3.amazonaws.com", "storage.googleapis.com", "sharepoint.com", "blob.core.windows.net",
         ]
     for host in free_hosts:
         if host in url:
@@ -155,7 +157,7 @@ def is_shortened(url):
     "spoo.me", "switchy.io", "tinu.be", "tinyurl.com", "t.ly", "urlr.me", 
     "v.gd", "vo.la", "yaso.su", "zlnk.com", "sor.bz", "73.nu", "lyn.bz",
     "shlink.io", "yourls.org", "polr.me",
-    "git.io", "goo.gl", "me2.do", "cutit.org", "s2r.co", "soo.gd", "hoy.kr"
+    "git.io", "goo.gl", "me2.do", "cutit.org", "s2r.co", "soo.gd", "hoy.kr", "tr.ee"
     ]
     for element in shorteners_list:
         if element in url:
@@ -183,9 +185,3 @@ def features(url, safe, pop):
     "URL is shortened": is_shortened(url)
     }
     return features
-
-
-
-
-url = input("Enter URL link: ")
-print(features(url, safe_domains, popular_domains))
