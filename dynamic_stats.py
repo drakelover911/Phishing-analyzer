@@ -21,17 +21,17 @@ def connection(url):
     
 def response_length(response):
     if response == -1:
-        return -1
+        return None
     return len(response.text)
 
 def history_length(response):
     if response == -1:
-        return -1
+        return None
     return len(response.history)
 
 def server(response):
     if response == -1:
-        return -1
+        return None
     try:
         server = response.headers.get('Server')
         if server.lower() == "let's encrypt":
@@ -44,7 +44,7 @@ def server(response):
 
 def forms(driver):
     if driver == -1:
-        return -1
+        return None
     try:
         forms = driver.find_elements("tag name", "form")
         return len(forms)
@@ -53,7 +53,7 @@ def forms(driver):
 
 def links(driver):
     if driver == -1:
-        return -1
+        return None
     try:
         links = driver.find_elements(By.TAG_NAME, 'a')
         return len(links)
@@ -62,7 +62,7 @@ def links(driver):
     
 def external_links(driver, url):
     if driver == -1:
-        return -1
+        return None
     ext2 = tldextract.extract(url)
     ext2 = ext2.domain + "." + ext2.suffix
     count = 0
@@ -79,7 +79,7 @@ def external_links(driver, url):
 
 def password_forms(driver):
     if driver == -1:
-        return -1
+        return None
     try:
         passwords = driver.find_elements("xpath", "//input[@type='password']")
         return len(passwords)
@@ -88,7 +88,7 @@ def password_forms(driver):
 
 def text_forms(driver):
     if driver == -1:
-        return -1
+        return None
     try:
         texts = driver.find_elements("xpath", "//input[@type='text']")
         return len(texts)
@@ -97,7 +97,7 @@ def text_forms(driver):
     
 def hidden(driver):
     if driver == -1:
-        return -1
+        return None
     try:
         hidden = driver.find_elements("xpath", "//input[@type='hidden']")
         return len(hidden)
@@ -106,7 +106,7 @@ def hidden(driver):
     
 def img(driver):
     if driver == -1:
-        return -1
+        return None
     try:
         images = driver.find_elements("tag name", "img")
         return len(images)
@@ -115,7 +115,7 @@ def img(driver):
     
 def suspicious_keywords(driver, keywords, response):
     if response == -1 or driver == -1:
-        return -1
+        return None
     length = len(response.text)
     keywords = keywords.lower().splitlines()
     page_text = driver.page_source.lower()
@@ -136,13 +136,12 @@ def whois_connect(url):
         return -1
 
 
-def connection_1(url):
+def connection_1():
     driver = -1
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option('useAutomationExtension', False)
-
     try:
         driver = webdriver.Chrome(options=options)
         stealth(driver,
@@ -153,16 +152,10 @@ def connection_1(url):
         renderer="Intel Iris OpenGL Engine",
         fix_hairline=True,
         )
-        driver.get(url)
-        current = url
-        final = driver.current_url
-        time.sleep(1.5)
-        if current !=final:
-            return driver, 1
-        else:
-            return driver, 0
+        time.sleep(0.8)
+        return driver
     except:
-        return -1, 0
+        return -1
     
 
 def domain_days(w):
@@ -197,7 +190,7 @@ def expiration_time(w):
     except:
         return -1
 
-def features1(url, response, driver, w, score, redirected, keywords):
+def features1(url, response, driver, w, score, keywords):
     features = {"SSL/Connection": score,
     "Response length": response_length(response),
     "Suspicious server": server(response),
@@ -209,7 +202,6 @@ def features1(url, response, driver, w, score, redirected, keywords):
     "Domain age in days": domain_days(w),
     "Domain expires in ? days": expiration_time(w),
     "Number of images": img(driver),
-    "Was redirected": redirected,
     "Number of links in HTML": links(driver),
     "Number of external links": external_links(driver, url),
     "History length (number of redirections)": history_length(response)

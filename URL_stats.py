@@ -121,14 +121,6 @@ def check_keywords(url):
             count +=1
     return count
 
-def check_fake_domains(url, data):
-    ext = tldextract.extract(url)
-    url = ext.domain + "." + ext.suffix
-    for domain in data:
-        if domain in url and not check_whitelist(url, safe_domains):
-            return 1
-    return 0
-
 def check_distance(url, data):
     lista = []
     ext = tldextract.extract(url)
@@ -172,13 +164,12 @@ def is_shortened(url):
     return 0
     
     
-def features(url, safe, pop):
+def features(url, pop):
     features = {"HTTP": check_http(url),
     "URL Length": check_length(url),
     "Popular tld in URL": check_tld(url),
     "IP": check_ip(url),
     "Non-latin characters": check_latin(url),
-    "URL IN WHITELIST": check_whitelist(url, safe),
     "Entropy": check_shannon_entropy(url),
     "@ in url": check_at(url),
     "Suspicious characters": check_characters(url),
@@ -186,7 +177,6 @@ def features(url, safe, pop):
     "Subdomains": check_subdomains(url),
     "Sus domains": check_sus_domains(url),
     "Number of phishing words": check_keywords(url),
-    "Popular domain and not in whitelist": check_fake_domains(url, safe),
     "Levenshtein Distance": check_distance(url,pop),
     "Free Hosting": is_free_hosting(url),
     "URL is shortened": is_shortened(url)
