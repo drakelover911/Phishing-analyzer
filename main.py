@@ -5,10 +5,8 @@ import pandas as pd
 with open("spam.txt", "r") as f:
         keywords = f.read()
 
-
 dd = pd.read_csv("top500Domains.csv", usecols=["Root Domain"])
 popular_domains = set(dd["Root Domain"])
-
 
 driver = connection_1()
 def final_function(url, driver):
@@ -19,4 +17,11 @@ def final_function(url, driver):
     
         final = f_dynamic | f_url
         return final
+
+with open ("list.txt", "r") as f:
+    data = f.read().splitlines()
+driver.get(data[0])
+results_for_sql = final_function(data[0], driver)
+columns = list(results_for_sql.keys())
+driver.quit()
         
