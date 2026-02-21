@@ -5,9 +5,6 @@ from collections import Counter
 from math import log
 import nltk
 
-df = pd.read_csv("top-1m.csv", usecols=[1], header=None)
-safe_domains = set(df[1])
-
 dd = pd.read_csv("top500Domains.csv", usecols=["Root Domain"])
 popular_domains = set(dd["Root Domain"])
 
@@ -39,16 +36,6 @@ def check_latin(url):
     for letter in url:
         if (ord(letter) > 126 or ord(letter) < 32):
             return 1
-    return 0
-
-def check_whitelist(url, data):
-    ext = tldextract.extract(url)
-    if ext.subdomain !="":
-        url = ext.subdomain + "." + ext.domain + "." + ext.suffix
-    else:
-        url = ext.domain + "." + ext.suffix
-    if url in data:
-        return 1
     return 0
 
 def check_shannon_entropy(url):

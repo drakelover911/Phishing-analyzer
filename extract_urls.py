@@ -1,6 +1,6 @@
-from main import final_function, connection_1, columns, data
-from SQL import sql
-
+from main import final_function, connection_1, data, sql
+with open("columns.txt", "r") as f:
+    columns = f.read().splitlines()
 c, conn = sql(columns)
 driver = connection_1()
 for element in data:
