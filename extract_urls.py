@@ -1,30 +1,12 @@
-from main import final_function, connection_1
-import sqlite3
+from main import final_function, connection_1, columns, data
+from SQL import sql
 
-
-with open("list.txt", "r") as f:
-    data = f.read().splitlines()
-
-first_result = final_function(data[0], driver)
-columns = list(first_result.keys())
-
-conn = sqlite3.connect("data.db")
-c = conn.cursor()
-
-columns_sql = ", ".join([f'"{col}" TEXT' for col in columns])
-sql= f"""
-CREATE TABLE IF NOT EXISTS results (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    url TEXT,
-    {columns_sql}
-)
-"""
-c.execute(sql)
-conn.commit()
-
+c, conn = sql(columns)
+driver = connection_1()
 for element in data:
     try:
-        result = final_function(element)
+        driver.get(element)
+        result = final_function(element, driver)
         keys = ", ".join([f'"{k}"' for k in result.keys()])
         placeholders = ", ".join(["?"] * len(result))
         values = list(result.values())
@@ -34,3 +16,4 @@ for element in data:
         print("Error:", e)
 conn.commit()
 conn.close()
+driver.quit()
