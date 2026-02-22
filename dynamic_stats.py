@@ -129,15 +129,17 @@ def suspicious_keywords(driver, keywords, response):
         return 0
 
 def whois_connect(url):
-    w = -1
+    available = 1
+    w = None
     ext = tldextract.extract(url)
     url = ext.domain + "." + ext.suffix
     try:
         w = whois.whois(url)
-        return w
     except Exception as s:
+        available = 0
         print(s)
-        return None
+        w = None
+    return w, available
 
 
 def connection_1():
@@ -146,7 +148,7 @@ def connection_1():
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option('useAutomationExtension', False)
     driver = webdriver.Chrome(options=options)
-    driver.set_page_load_timetout(7)
+    driver.set_page_load_timeout(7)
     stealth(driver,
     languages=["en-US", "en"],
     vendor="Google Inc.",
@@ -161,7 +163,7 @@ def connection_1():
     
 
 def domain_days(w):
-    if w == -1:
+    if w == None:
         return None
     try:
         if isinstance(w.creation_date, list):
@@ -177,7 +179,7 @@ def domain_days(w):
         return None
 
 def expiration_time(w):
-    if w == -1:
+    if w == None:
         return None
     try:
         if isinstance(w.expiration_date, list):
@@ -192,7 +194,7 @@ def expiration_time(w):
     except:
         return None
 
-def features1(url, response, driver, w, score, keywords):
+def features1(url, response, driver, w, score, keywords,  available):
     features = {"SSL/Connection": score,
     "Response length": response_length(response),
     "Suspicious server": server(response),
@@ -206,7 +208,8 @@ def features1(url, response, driver, w, score, keywords):
     "Number of images": img(driver),
     "Number of links in HTML": links(driver),
     "Number of external links": external_links(driver, url),
-    "History length (number of redirections)": history_length(response)
+    "History length (number of redirections)": history_length(response),
+    "whois  available":  available
     }
     return features
 
