@@ -172,6 +172,8 @@ def whois_connect(url):
 def connection_1():
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option('useAutomationExtension', False)
     driver = webdriver.Chrome(options=options)
     driver.set_page_load_timeout(10)
     stealth(driver,
