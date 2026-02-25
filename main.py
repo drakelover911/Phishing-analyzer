@@ -19,18 +19,19 @@ def sql(columns):
     conn.commit()
     return c, conn
 
-with open("spam.txt", "r") as f:
+with open("spam.txt", "r", encoding="utf-8") as f:
         keywords = f.read()
-with open("test.txt", "r") as d:
-       data = d.read().splitlines()
+
+data = pd.read_csv("verified_online.csv", usecols=["url"], nrows=7500)
+data = data.drop_duplicates()
 dd = pd.read_csv("top500Domains.csv", usecols=["Root Domain"])
 popular_domains = set(dd["Root Domain"])
 
 driver = connection_1()
 def final_function(url, driver):
         response, score = connection(url)
-        w = whois_connect(url)
-        f_dynamic = features1(url, response, driver, w, score, keywords) 
+        w,  available = whois_connect(url)
+        f_dynamic = features1(url, response, driver, w, score, keywords, available) 
         f_url = features(url, popular_domains)
     
         final = f_url | f_dynamic
