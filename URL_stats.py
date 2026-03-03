@@ -15,7 +15,7 @@ def check_http(url):
 
 def check_length(url):
     ext = tldextract.extract(url)
-    return len(ext.domain)
+    return len(ext)
        
 
 def check_tld(url):
@@ -42,12 +42,14 @@ def check_latin(url):
 def check_shannon_entropy(url):
     ext = tldextract.extract(url)
     if ext.subdomain:
-        domain = ext.subdomain + "." + ext.domain + "." + ext.suffix
+        url = ext.subdomain + "." + ext.domain
     else:
-        domain = ext.domain + "." + ext.suffix
-    counts = Counter(domain)
-    frequencies = (i / len(domain) for i in counts.values())
-    return -sum(f * log(f, 2) for f in frequencies)
+         url = ext.subdomain 
+    counts = Counter(url)
+    frequencies = ((i / len(url)) for i in counts.values())
+    result = -sum(f * log(f, 2) for f in frequencies)
+    return result
+
 def check_at(url):
     if "@" in url:
         return 1
@@ -56,12 +58,12 @@ def check_at(url):
 def check_characters(url):
     ext = tldextract.extract(url)
     if ext.subdomain:
-        domain = ext.subdomain + "." + ext.domain
+        url = ext.subdomain + "." + ext.domain
     else:
-        domain = ext.domain
+        url = ext.domain
     count = 0
-    suspicious_characters = ["?", "-", "_", "&", "*", "=", "%", "^", "#"]
-    for letter in domain:
+    suspicious_characters=["?", "-", "_", "&", "*", "=", "%", "^", "#"]
+    for letter in url:
         if letter in suspicious_characters:
             count += 1
     return count
@@ -69,10 +71,14 @@ def check_characters(url):
 def check_numbers(url):
     ext = tldextract.extract(url)
     if ext.subdomain:
-        domain = ext.subdomain + "." + ext.domain
+        url = ext.subdomain + "." + ext.domain
     else:
-        domain = ext.domain
-    return sum(c.isdigit() for c in domain)
+        url = ext.domain
+    count = 0
+    for char in url:
+        if char.isdigit():
+            count +=1
+    return count
 
 def check_subdomains(url):
     ext = tldextract.extract(url)
