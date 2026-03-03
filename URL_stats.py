@@ -14,7 +14,8 @@ def check_http(url):
     return 0
 
 def check_length(url):
-    return len(url)
+    ext = tldextract.extract(url)
+    return len(ext.domain)
        
 
 def check_tld(url):
@@ -40,12 +41,13 @@ def check_latin(url):
 
 def check_shannon_entropy(url):
     ext = tldextract.extract(url)
-    url = ext.domain +"." + ext.suffix
-    counts = Counter(url)
-    frequencies = ((i / len(url)) for i in counts.values())
-    result = -sum(f * log(f, 2) for f in frequencies)
-    return result
-
+    if ext.subdomain:
+        domain = ext.subdomain + "." + ext.domain + "." + ext.suffix
+    else:
+        domain = ext.domain + "." + ext.suffix
+    counts = Counter(domain)
+    frequencies = (i / len(domain) for i in counts.values())
+    return -sum(f * log(f, 2) for f in frequencies)
 def check_at(url):
     if "@" in url:
         return 1
@@ -53,29 +55,30 @@ def check_at(url):
 
 def check_characters(url):
     ext = tldextract.extract(url)
-    url = ext.domain + "." + ext.suffix
+    if ext.subdomain:
+        domain = ext.subdomain + "." + ext.domain
+    else:
+        domain = ext.domain
     count = 0
-    suspicious_characters=["?", "-", "_", "&", "*", "=", "%", "^", "#"]
-    for letter in url:
+    suspicious_characters = ["?", "-", "_", "&", "*", "=", "%", "^", "#"]
+    for letter in domain:
         if letter in suspicious_characters:
             count += 1
     return count
 
 def check_numbers(url):
     ext = tldextract.extract(url)
-    url = ext.domain + "." + ext.suffix
-    count = 0
-    for char in url:
-        if char.isdigit():
-            count +=1
-    return count
+    if ext.subdomain:
+        domain = ext.subdomain + "." + ext.domain
+    else:
+        domain = ext.domain
+    return sum(c.isdigit() for c in domain)
 
 def check_subdomains(url):
-    count = -1
-    for char in url:
-        if char == ".":
-            count +=1
-    return count
+    ext = tldextract.extract(url)
+    if not ext.subdomain:
+        return 0
+    return len(ext.subdomain.split("."))
 
 def check_sus_domains(url):
     list = [".ru", ".xyz", ".best", ".bid", ".click", ".info", ".zip", ".top", ".weebly"]
@@ -168,7 +171,6 @@ def is_shortened(url):
     
 def features(url, pop):
     features = {"HTTP": check_http(url),
-    "URL Length": check_length(url),
     "Popular tld in URL": check_tld(url),
     "IP": check_ip(url),
     "Non-latin characters": check_latin(url),
@@ -176,9 +178,8 @@ def features(url, pop):
     "@ in url": check_at(url),
     "Suspicious characters": check_characters(url),
     "Digits": check_numbers(url),
-    "Subdomains": check_subdomains(url),
     "Sus domains": check_sus_domains(url),
-    "Number of phishing words": check_keywords(url),
+    "Subdomains": check_keywords(url),
     "Levenshtein Distance": check_distance(url,pop),
     "Free Hosting": is_free_hosting(url),
     "URL is shortened": is_shortened(url)
