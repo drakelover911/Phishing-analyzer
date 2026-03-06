@@ -45,12 +45,17 @@ ext = tldextract.extract(url)
 root_domain = (ext.domain + "." + ext.suffix).lower()
 
 if ext.subdomain:
-       domain = ext.subdomain + "." + ext.domain + "." + ext.suffix
+       full_domain = ext.subdomain + "." + ext.domain + "." + ext.suffix
+       full_domain1 = ext.subdomain + "." + ext.domain
 else:
-       domain = root_domain
+       full_domain = root_domain
+       full_domain1 = ext.domain
+
+domain = full_domain.lower().removeprefix("www.")
+domain1 = full_domain1.lower().removeprefix("www.")
 
 is_whitelist = False
-if (domain in whitelist_domains):
+if (domain in whitelist_domains or domain1 in whitelist_domains):
         is_whitelist = True
 for element in shorteners_list:
       if element in domain:
