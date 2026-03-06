@@ -58,7 +58,12 @@ The initial version required the user to be compatible with my settings, manuall
 ```
 docker build -t phishing-analyzer .
 ```
-
+There is a possibility that the Docker (on Windows) due to Chrome usage will consume a lot of RAM. To prevent this you can make a .wslconfig file in your home directory with:
+```
+[wsl2]
+memory=3GB
+processors=2
+```
 ## Usage
 
 ```
@@ -94,10 +99,10 @@ The final dataset (~85,000 URLs) was split into:
 - All splits are stratified on `is_phish` (~50% phish, 50% safe).
 ## Project limitations
 
-New fresh domains can cause false positives in the model, it is difficult to distinguish phishing from safe based on features alone in such a case.
-Dynamic analysis requires the site to be reachable.
-Majestic Million (whitelist) covers popularity, not safety.
-Dynamic analysis adds 5–10 seconds per URL due to Selenium and WHOIS load.
-
+- New fresh domains can cause false positives in the model, it is difficult to distinguish phishing from safe based on features alone in such a case.
+- Dynamic analysis requires the site to be reachable.
+- Majestic Million (whitelist) covers popularity, not safety.
+- Dynamic analysis adds 5–10 seconds per URL due to Selenium and WHOIS load.
+- Docker can consume a lot of RAM in Windows.
 
 ## Author: Jan Kusiowski
