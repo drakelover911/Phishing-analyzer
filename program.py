@@ -11,6 +11,7 @@ static_model = xgb.XGBClassifier()
 static_model.load_model("models/static_model.json")
 dynamic_model = xgb.XGBClassifier()
 dynamic_model.load_model("models/dynamic_model.json")
+
 model_xgb = xgb.XGBClassifier()
 model_xgb.load_model("models/meta_model_1.json")
 with open("models/meta_model_lr.pkl", "rb") as f:
@@ -51,7 +52,6 @@ else:
     static_data = pd.DataFrame([static_results])
     y_proba = static_model.predict_proba(static_data)[:,1]
     print(f"STATIC: This site is {y_proba[0] * 100:.2f}% phishing")
-
     #dynamic
     w,  available = whois_connect(url)
     try:   
