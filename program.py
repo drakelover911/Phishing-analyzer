@@ -37,6 +37,7 @@ dd = pd.read_csv("features/top500Domains.csv", usecols=["Root Domain"])
 popular_domains = set(dd["Root Domain"])
 
 url = input("Enter URL:")
+url = url.replace("www.","", 1)
 response, score = connection(url)
 if response is None:
     print(Fore.RED +"Invalid URL or website does not exist anymore!" + Style.RESET_ALL)
@@ -55,8 +56,8 @@ domain = full_domain.lower().removeprefix("www.")
 domain1 = full_domain1.lower().removeprefix("www.")
 
 is_whitelist = False
-if (domain in whitelist_domains or domain1 in whitelist_domains):
-    is_whitelist = True
+#if (domain in whitelist_domains or domain1 in whitelist_domains):
+ #   is_whitelist = True
 for element in shorteners_list:
       if element in domain:
             is_whitelist = False
@@ -65,7 +66,6 @@ for element in shorteners_list:
 if is_whitelist:
         print(Fore.GREEN + "URL is on whitelist: 0% PHISH" + Style.RESET_ALL)
 else:
-
     #static
     static_results = features(url, popular_domains)
     static_data = pd.DataFrame([static_results])

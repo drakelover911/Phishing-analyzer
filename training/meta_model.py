@@ -39,11 +39,12 @@ X_meta = pd.DataFrame({
 })
 
 model = xgb.XGBClassifier(
-    n_estimators = 140,
+    n_estimators = 100,
     max_depth = 2,
-    learning_rate = 0.05,
+    learning_rate = 0.06,
     eval_metric = "auc",
     random_state = 42,
+    scale_pos_weight=2.5
 )
 model.fit(X_meta, y)
 
