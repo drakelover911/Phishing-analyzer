@@ -6,18 +6,19 @@ Developed a real-time working phishing analyzer based on Four Models (stacking e
 
 After giving the URL to the program, analysis and extraction of features is performed.
 
-###  1. Static analysis
+###  1. Whitelist
+If the website is on the whitelist (majestic million) then it is considered 100% safe and we do not extract the features from the site.
 
-The first stage is static analysis which examines only the URL string. It gives the model information about the domain length, Shannon entropy, Levenshtein distance to top 500 domains, how many subdomains, how many digits, is the tld considered suspicious etc.
+###  2. Static analysis
 
-###  2. Dynamic analysis
-The second stage is dynamic analysis, the program examines the website using libraries like requests, selenium (stealth), and WHOIS. This stage gives us information about SSL, number of redirections, text to html ratio, did the domain change after redirection, number of: forms (password and text), scripts, links, external links, hidden elements, images, iframes. It also checks the Levenshtein distance between the page title and domain, counts suspicious, phishing words, checks if whois connection is successful or not, counts the domain age in days.
+The second stage is static analysis which examines only the URL string. It gives the model information about the domain length, Shannon entropy, Levenshtein distance to top 500 domains, how many subdomains, how many digits, is the tld considered suspicious etc.
 
-###  3. Meta Models
+###  3. Dynamic analysis
+The third stage is dynamic analysis, the program examines the website using libraries like requests, selenium (stealth), and WHOIS. This stage gives us information about SSL, number of redirections, text to html ratio, did the domain change after redirection, number of: forms (password and text), scripts, links, external links, hidden elements, images, iframes. It also checks the Levenshtein distance between the page title and domain, counts suspicious, phishing words, checks if whois connection is successful or not, counts the domain age in days.
+
+###  4. Meta Models
 After collecting all the features, we pass them to both models, Static and Dynamic (XGBoost), both models give a prediction whether the website is phishing or not, then our meta model takes these two probabilities and based on them determines the final result.
 
-###  4. Whitelist
-If the website is on the whitelist (majestic million) then it is considered 100% safe and we do not extract the features from the site.
 ```mermaid 
 graph LR 
 A[URL] --> W{Majestic Million?} 
@@ -32,15 +33,15 @@ D --> E[Final result %]
 
 ## Results
 
-I did a test based on 13k URLS (50% phish and 50% safe)
+I did a test based on 8k URLS (50% phish and 50% safe)
 
 |      Model          |AUC                          |False Positives/False negatives                         |
 |----------------|-------------------------------|-----------------------------|
-|Meta model XGBoost|        **0.9977**   |   76 / 142         |
-|Meta model LR         |       **0.9976**   |173 / 93            |
+|Meta model XGBoost|        **0.9952**   |   144 / 74         |
+|Meta model LR         |       **0.9943**   |148 / 79            |
 
 - Both meta models achieve 98% recall and precision.
-- Meta models perform much better than two separate (static and dynamic) models. Logistic Regression ensures much fewer False Negatives (missed phishing) which is crucial in cybersecurity. However, because of the high amount of False Positives (safe websites marked as phishing), it might be annoying for the user.
+- Meta models perform much better than two separate (static and dynamic) models. At first, a Logistic Regression meta-model was tested as a baseline, XGBoost meta model gave much more False Negatives (phishing marked as safe) than LR. However, after optimizing scale_pos_weight parameter, XGBoost outperformed LR across all dimensions.
 
 
 ## Feature importance (SHAP)
@@ -54,9 +55,18 @@ I did a test based on 13k URLS (50% phish and 50% safe)
 
 ## Run with Docker
 The initial version required the user to be compatible with my settings, manually download files, etc. To prevent this, I decided to use Docker to streamline the process.
-### To build the image, run:
+### Option 1 - Pull from Docker Hub
+If you just want to use the tool without downloading my source code, just run:
 ```
+docker run -it jjkusio/phishing-analyzer
+```
+### Option 2 - Build the image:
+If you want to download my source code, make changes, etc., you can use these commands:
+```
+git clone https://github.com/jjkusio/Phishing-analyzer.git
+cd phishing-analyzer
 docker build -t phishing-analyzer .
+docker run -it phishing-analyzer
 ```
 There is a possibility that the Docker (on Windows) due to Chrome usage will consume a lot of RAM. To prevent this you can make a .wslconfig file in your home directory with:
 ```
@@ -64,12 +74,15 @@ There is a possibility that the Docker (on Windows) due to Chrome usage will con
 memory=3GB
 processors=2
 ```
-## Usage
 
+### Option 3 - Run without Docker
 ```
-docker run -it phishing-analyzer
+git clone https://github.com/jjkusio/Phishing-analyzer.git
+cd Phishing-analyzer
+pip install -r requirements.txt
+python program.py
 ```
-
+Requirements: Python 3.10+, Google Chrome, ChromeDriver matching your Chrome version, Majestic Million CSV file (you have to download it by yourself) https://majestic.com/reports/majestic-million
 ## Example outputs:
 ```
 Enter URL: https://ipkobizness.pl-radiant.info/ipko.php
