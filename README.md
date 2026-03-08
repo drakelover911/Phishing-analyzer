@@ -72,7 +72,7 @@ memory=3GB
 processors=2
 ```
 
-### Option 3 - Run without Docker
+## Run without Docker
 ```
 git clone https://github.com/jjkusio/Phishing-analyzer.git
 cd Phishing-analyzer
