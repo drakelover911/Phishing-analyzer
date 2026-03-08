@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage("Checkout"){
             steps{
-                git "https://github.com/jjkusio/Phishing-analyzer"
+                git branch: "main", url: "https://github.com/jjkusio/Phishing-analyzer"
             }
             }
             stage("Build Docker image"){
