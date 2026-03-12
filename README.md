@@ -96,6 +96,8 @@ python setup_data.py
 python program.py
 ```
 
+`setup_data.py` downloads `majestic_million.csv` from [Majestic](https://majestic.com/reports/majestic-million) and auto-generates `features/top500Domains.csv` from its top 500 rows. Both files are git-ignored.
+
 Requirements: Python 3.10+, Google Chrome, ChromeDriver matching your Chrome version
 
 ## Example outputs:
